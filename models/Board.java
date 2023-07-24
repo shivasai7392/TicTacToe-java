@@ -1,11 +1,28 @@
 package models;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Board {
     private int size;
     private List<List<Cell>> grid;
+    private HashMap<Integer, HashMap<Character, Integer>> rowCounter;
+    private HashMap<Integer, HashMap<Character, Integer>> colCounter;
+
+    public HashMap<Integer, HashMap<Character, Integer>> getRowCounter() {
+        return rowCounter;
+    }
+
+    public HashMap<Integer, HashMap<Character, Integer>> getColCounter() {
+        return colCounter;
+    }
+
+    public HashMap<Integer, HashMap<Character, Integer>> getDiagCounter() {
+        return diagCounter;
+    }
+
+    private HashMap<Integer, HashMap<Character, Integer>> diagCounter;
 
     public Board(int size) {
         this.size = size;
@@ -16,6 +33,11 @@ public class Board {
                 this.grid.get(i).add(new Cell(i, j));
             }
         }
+        this.colCounter = new HashMap<>();
+        this.rowCounter = new HashMap<>();
+        this.diagCounter = new HashMap<>();
+        this.diagCounter.put(1, new HashMap<>());
+        this.diagCounter.put(2, new HashMap<>());
     }
 
     public int getSize() {
@@ -32,5 +54,16 @@ public class Board {
 
     public void setGrid(List<List<Cell>> grid) {
         this.grid = grid;
+    }
+
+    public void print(){
+        for (List<Cell> row : grid){
+            System.out.print("|");
+            for (Cell cell : row){
+                cell.print();
+                System.out.print("|");
+            }
+            System.out.println();
+        }
     }
 }

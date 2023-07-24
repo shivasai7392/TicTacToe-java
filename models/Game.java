@@ -14,6 +14,9 @@ public class Game {
     private GameStatus gameStatus;
     private Player winner;
 
+    public static Builder getBuilder(){
+        return new Builder();
+    }
 
     public Game(int dimension, List<WinningStrategy> winningStrategies, List<Player> players) {
         this.moves = new ArrayList<Move>();
@@ -80,4 +83,152 @@ public class Game {
         this.winner = winner;
     }
 
+    public void printBoard(){
+        this.board.print();
+    }
+
+    public void printWinner(){
+        GameStatus gameStatus = this.getGameStatus();
+
+        if (gameStatus.equals(GameStatus.ENDED)){
+            this.printBoard();
+            System.out.println(getWinner().getName() + " has won the game.");
+        }
+        else{
+            System.out.println("Game is DRAW");
+        }
+    }
+
+    public void makeMove(){
+        Player currentPlayer = players.get(this.currentPlayerIndex);
+        System.out.println(currentPlayer.getName()+"'s turn.");
+
+        Cell proposedCell = currentPlayer.makeMove(this.board);
+
+        System.out.println("Move made at row : "+proposedCell.getRow()+" at col : "+proposedCell.getCol()+".");
+
+        if (!this.validateMove(proposedCell)){
+            System.out.println("Invalid Move. Retry");
+        }
+        else{
+            Move move = new Move(currentPlayer, proposedCell);
+            this.moves.add(move);
+
+            Cell cellInBoard = this.board.getGrid().get(proposedCell.getRow()).get(proposedCell.getCol());
+            cellInBoard.setPlayer(currentPlayer);
+            cellInBoard.setCellStatus(CellStatus.FILLED);
+
+            if (checkGameWinner(currentPlayer, move)) return;
+
+            if (checkGameDraw()) return;
+
+            this.currentPlayerIndex += 1;
+            this.currentPlayerIndex %= this.players.size();
+        }
+
+    }
+
+    private boolean checkGameDraw() {
+        if (this.moves.size() == this.board.getSize()*this.board.getSize()){
+            //we are assuming there are no blocked cells
+            this.gameStatus = GameStatus.DRAW;
+            return true;
+        }
+        return false;
+    }
+
+    private boolean checkGameWinner(Player currentPlayer, Move move) {
+        for (WinningStrategy winningStrategy : this.winningStrategies){
+            if (winningStrategy.checkWinner(this.board, move)){
+                this.gameStatus = GameStatus.ENDED;
+                this.winner = currentPlayer;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean validateMove(Cell cell){
+
+        return (cell.getRow() >= 0 && cell.getCol() >= 0) && (cell.getRow() < this.board.getSize() && cell.getCol() < this.board.getSize()) && (cell.getCellStatus().equals(CellStatus.EMPTY));
+    }
+
+    public void undo(){
+        if (this.moves.size() == 0){
+            System.out.println("Undo is not Available.");
+            return;
+        }
+        Move lastMove = this.moves.get(this.moves.size()-1);
+        Cell cell = lastMove.getCell();
+        Cell cellInBoard = this.board.getGrid().get(cell.getRow()).get(cell.getCol());
+        cellInBoard.setPlayer(null);
+        cellInBoard.setCellStatus(CellStatus.EMPTY);
+        this.moves.remove(this.moves.size()-1);
+
+        int row = cell.getRow();
+        int col = cell.getCol();
+        this.board.getRowCounter().get(row).put(lastMove.getPlayer().getSymbol().getShape(), this.board.getRowCounter().get(row).get(lastMove.getPlayer().getSymbol().getShape())-1);
+        this.board.getColCounter().get(col).put(lastMove.getPlayer().getSymbol().getShape(), this.board.getColCounter().get(col).get(lastMove.getPlayer().getSymbol().getShape())-1);
+        if (row == col){
+            this.board.getDiagCounter().get(1).put(lastMove.getPlayer().getSymbol().getShape(), this.board.getDiagCounter().get(1).get(lastMove.getPlayer().getSymbol().getShape())-1);
+        }
+        if (row + col == this.board.getSize()-1){
+            this.board.getDiagCounter().get(2).put(lastMove.getPlayer().getSymbol().getShape(), this.board.getDiagCounter().get(2).get(lastMove.getPlayer().getSymbol().getShape())-1);
+        }
+
+        this.currentPlayerIndex -= 1;
+        this.currentPlayerIndex %= this.board.getSize();
+    }
+
+    public static class Builder{
+
+        private List<Player> players;
+        private List<WinningStrategy> winningStrategies;
+        private int dimension;
+
+        private Builder(){
+
+        }
+
+        public Builder setPlayers(List<Player> players) {
+            this.players = players;
+            return this;
+        }
+
+        public Builder setWinningStrategies(List<WinningStrategy> winningStrategies) {
+            this.winningStrategies = winningStrategies;
+            return this;
+        }
+
+        public Builder setDimension(int dimension) {
+            this.dimension = dimension;
+            return this;
+        }
+
+        private boolean validate(){
+            if (this.players.size() != this.dimension - 1){
+                return false;
+            }
+
+            int bot_count = 0;
+            for (Player player: this.players){
+                if (player instanceof Bot){
+                    bot_count += 1;
+                }
+                if (bot_count > 1){
+                    return false;
+                }
+            }
+
+            return this.winningStrategies.size() >= 1;
+        }
+        public Game build() {
+            if (!validate()){
+                System.out.println("Invalid Game.");
+            }
+
+            return new Game(this.dimension, this.winningStrategies, this.players);
+
+        }
+    }
 }
