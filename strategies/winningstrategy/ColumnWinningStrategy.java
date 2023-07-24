@@ -2,32 +2,44 @@ package strategies.winningstrategy;
 
 import models.Board;
 import models.Move;
+import models.Player;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class ColumnWinningStrategy implements WinningStrategy{
 
-    @Override
-    public boolean checkWinner(Board board, Move move) {
-        int col = move.getCell().getCol();
-        int dimension = board.getSize();
-        char shape = move.getPlayer().getSymbol().getShape();
-        if (board.getColCounter().containsKey(col)) {
-            if (board.getColCounter().get(col).containsKey(shape)) {
-                int val = board.getColCounter().get(col).get(shape) + 1;
-                board.getColCounter().get(col).put(shape, val);
-                if (val == dimension){
-                    return true;
-                }
-            } else {
-                board.getColCounter().get(col).put(shape, 0);
+    private final List<HashMap<Character, Integer>> colCounter;
+    private final int dimension;
+
+    public ColumnWinningStrategy(int dimension, List<Player> players) {
+        this.dimension = dimension;
+        this.colCounter = new ArrayList<>();
+        for (int i = 0; i<dimension; ++i){
+            HashMap<Character, Integer> map = new HashMap<>();
+            for (Player player : players){
+                map.put(player.getSymbol().getShape(), 0);
             }
+            this.colCounter.add(map);
         }
-        else{
-            board.getColCounter().put(col, new HashMap<>());
-            HashMap<Character, Integer> map = board.getColCounter().get(col);
-            map.put(shape, 1);
-        }
-        return false;
+    }
+
+    @Override
+    public void undoMove(Move move) {
+        int col = move.getCell().getCol();
+        HashMap<Character, Integer> map = this.colCounter.get(col);
+        int char_count = map.get(move.getPlayer().getSymbol().getShape());
+        map.put(move.getPlayer().getSymbol().getShape(), char_count-1);
+    }
+
+    @Override
+    public boolean checkWinner(Move move) {
+        int col = move.getCell().getCol();
+        HashMap<Character, Integer> map = this.colCounter.get(col);
+        int char_count = map.get(move.getPlayer().getSymbol().getShape());
+        char_count += 1;
+        map.put(move.getPlayer().getSymbol().getShape(), char_count);
+        return char_count == this.dimension;
     }
 }

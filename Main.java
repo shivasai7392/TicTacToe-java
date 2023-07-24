@@ -13,15 +13,18 @@ public class Main {
         GameController gameController = new GameController();
         Scanner scanner = new Scanner(System.in);
 
-        Game game = gameController.createGame(3,
+        List<Player> players = List.of(
+                new Player(new Symbol('X'),"Shiva", PlayerType.HUMAN)
+        );
+
+        int dimension = 3;
+
+        Game game = gameController.createGame(dimension,
+                players,
                 List.of(
-                        new Player(new Symbol('X'),"Shiva", PlayerType.HUMAN),
-                        new Bot(new Symbol('O'),"Lakshmi", DifficultyLevel.EASY)
-                ),
-                List.of(
-                        new ColumnWinningStrategy(),
-                        new DiagonalWinningStrategy(),
-                        new RowWinningStrategy()
+                        new ColumnWinningStrategy(dimension, players),
+                        new DiagonalWinningStrategy(dimension, players),
+                        new RowWinningStrategy(dimension, players)
                 ));
 
 

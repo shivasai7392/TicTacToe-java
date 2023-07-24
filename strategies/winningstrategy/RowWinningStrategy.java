@@ -2,32 +2,43 @@ package strategies.winningstrategy;
 
 import models.Board;
 import models.Move;
+import models.Player;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class RowWinningStrategy implements WinningStrategy {
+    private List<HashMap<Character, Integer>> rowCounter;
+    private int dimension;
+
+    public RowWinningStrategy(int dimension, List<Player> players) {
+        this.dimension = dimension;
+        this.rowCounter = new ArrayList<>();
+        for (int i = 0; i<dimension; ++i){
+            HashMap<Character, Integer> map = new HashMap<>();
+            for (Player player : players){
+                map.put(player.getSymbol().getShape(), 0);
+            }
+            this.rowCounter.add(map);
+        }
+    }
 
     @Override
-    public boolean checkWinner(Board board, Move move) {
+    public void undoMove(Move move) {
         int row = move.getCell().getRow();
-        char shape = move.getPlayer().getSymbol().getShape();
-        int dimension = board.getSize();
-        if (board.getRowCounter().containsKey(row)) {
-            if (board.getRowCounter().get(row).containsKey(shape)) {
-                int val = board.getRowCounter().get(row).get(shape) + 1;
-                board.getRowCounter().get(row).put(shape, val);
-                if (val == dimension){
-                    return true;
-                }
-            } else {
-                board.getRowCounter().get(row).put(shape, 0);
-            }
-        }
-        else{
-            board.getRowCounter().put(row, new HashMap<>());
-            HashMap<Character, Integer> map = board.getRowCounter().get(row);
-            map.put(shape, 1);
-        }
-        return false;
+        HashMap<Character, Integer> map = this.rowCounter.get(row);
+        int char_count = map.get(move.getPlayer().getSymbol().getShape());
+        map.put(move.getPlayer().getSymbol().getShape(), char_count-1);
+    }
+
+    @Override
+    public boolean checkWinner(Move move) {
+        int row = move.getCell().getRow();
+        HashMap<Character, Integer> map = this.rowCounter.get(row);
+        int char_count = map.get(move.getPlayer().getSymbol().getShape());
+        char_count += 1;
+        map.put(move.getPlayer().getSymbol().getShape(), char_count);
+        return char_count == this.dimension;
     }
 }

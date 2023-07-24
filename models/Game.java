@@ -139,7 +139,7 @@ public class Game {
 
     private boolean checkGameWinner(Player currentPlayer, Move move) {
         for (WinningStrategy winningStrategy : this.winningStrategies){
-            if (winningStrategy.checkWinner(this.board, move)){
+            if (winningStrategy.checkWinner(move)){
                 this.gameStatus = GameStatus.ENDED;
                 this.winner = currentPlayer;
                 return true;
@@ -149,8 +149,8 @@ public class Game {
     }
 
     public boolean validateMove(Cell cell){
-
-        return (cell.getRow() >= 0 && cell.getCol() >= 0) && (cell.getRow() < this.board.getSize() && cell.getCol() < this.board.getSize()) && (cell.getCellStatus().equals(CellStatus.EMPTY));
+        Cell cellInBoard = this.board.getGrid().get(cell.getRow()).get(cell.getCol());
+        return (cell.getRow() >= 0 && cell.getCol() >= 0) && (cell.getRow() < this.board.getSize() && cell.getCol() < this.board.getSize()) && (cellInBoard.getCellStatus().equals(CellStatus.EMPTY));
     }
 
     public void undo(){
@@ -165,18 +165,12 @@ public class Game {
         cellInBoard.setCellStatus(CellStatus.EMPTY);
         this.moves.remove(this.moves.size()-1);
 
-        int row = cell.getRow();
-        int col = cell.getCol();
-        this.board.getRowCounter().get(row).put(lastMove.getPlayer().getSymbol().getShape(), this.board.getRowCounter().get(row).get(lastMove.getPlayer().getSymbol().getShape())-1);
-        this.board.getColCounter().get(col).put(lastMove.getPlayer().getSymbol().getShape(), this.board.getColCounter().get(col).get(lastMove.getPlayer().getSymbol().getShape())-1);
-        if (row == col){
-            this.board.getDiagCounter().get(1).put(lastMove.getPlayer().getSymbol().getShape(), this.board.getDiagCounter().get(1).get(lastMove.getPlayer().getSymbol().getShape())-1);
-        }
-        if (row + col == this.board.getSize()-1){
-            this.board.getDiagCounter().get(2).put(lastMove.getPlayer().getSymbol().getShape(), this.board.getDiagCounter().get(2).get(lastMove.getPlayer().getSymbol().getShape())-1);
+        for (WinningStrategy winningStrategy : this.winningStrategies){
+            winningStrategy.undoMove(lastMove);
         }
 
         this.currentPlayerIndex -= 1;
+        this.currentPlayerIndex += this.board.getSize();
         this.currentPlayerIndex %= this.board.getSize();
     }
 
@@ -206,6 +200,10 @@ public class Game {
         }
 
         private boolean validate(){
+            if (this.dimension <= 2){
+                return false;
+            }
+
             if (this.players.size() != this.dimension - 1){
                 return false;
             }
@@ -225,6 +223,7 @@ public class Game {
         public Game build() {
             if (!validate()){
                 System.out.println("Invalid Game.");
+                return null;
             }
 
             return new Game(this.dimension, this.winningStrategies, this.players);
