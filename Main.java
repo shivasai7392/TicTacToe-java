@@ -3,7 +3,6 @@ import models.*;
 import strategies.winningstrategy.ColumnWinningStrategy;
 import strategies.winningstrategy.DiagonalWinningStrategy;
 import strategies.winningstrategy.RowWinningStrategy;
-import strategies.winningstrategy.WinningStrategy;
 
 import java.util.List;
 import java.util.Scanner;

@@ -3,8 +3,6 @@ package strategies.winningstrategy;
 import models.Board;
 import models.Move;
 
-import java.util.HashMap;
-
 public class DiagonalWinningStrategy implements WinningStrategy{
 
     @Override

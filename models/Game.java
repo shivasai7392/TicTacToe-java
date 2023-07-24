@@ -19,7 +19,7 @@ public class Game {
     }
 
     public Game(int dimension, List<WinningStrategy> winningStrategies, List<Player> players) {
-        this.moves = new ArrayList<Move>();
+        this.moves = new ArrayList<>();
         this.board = new Board(dimension);
         this.players = players;
         this.currentPlayerIndex = 0;

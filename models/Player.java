@@ -6,7 +6,7 @@ public class Player {
     private Symbol symbol;
     private String name;
     private PlayerType playerType;
-    private Scanner scanner;
+    private final Scanner scanner;
 
     public Player(Symbol symbol, String name, PlayerType playerType) {
         this.symbol = symbol;

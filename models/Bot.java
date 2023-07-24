@@ -5,7 +5,7 @@ import strategies.botplayingstrategy.BotPlayingStrategy;
 
 public class Bot extends Player{
     private DifficultyLevel difficultyLevel;
-    private BotPlayingStrategy botPlayingStrategy;
+    private final BotPlayingStrategy botPlayingStrategy;
 
     public Bot(Symbol symbol, String name, DifficultyLevel difficultyLevel) {
         super(symbol, name, PlayerType.BOT);

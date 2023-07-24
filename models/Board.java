@@ -7,8 +7,8 @@ import java.util.List;
 public class Board {
     private int size;
     private List<List<Cell>> grid;
-    private HashMap<Integer, HashMap<Character, Integer>> rowCounter;
-    private HashMap<Integer, HashMap<Character, Integer>> colCounter;
+    private final HashMap<Integer, HashMap<Character, Integer>> rowCounter;
+    private final HashMap<Integer, HashMap<Character, Integer>> colCounter;
 
     public HashMap<Integer, HashMap<Character, Integer>> getRowCounter() {
         return rowCounter;
@@ -22,7 +22,7 @@ public class Board {
         return diagCounter;
     }
 
-    private HashMap<Integer, HashMap<Character, Integer>> diagCounter;
+    private final HashMap<Integer, HashMap<Character, Integer>> diagCounter;
 
     public Board(int size) {
         this.size = size;
